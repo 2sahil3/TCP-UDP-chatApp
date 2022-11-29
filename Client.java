@@ -17,6 +17,7 @@ import java.util.StringTokenizer;
 public class Client extends JFrame
 {
     public  String ip="192.168.0.147";
+//    public  String ip="116.74.160.126";
     public int port = 6661;
     public DatagramSocket clientSocUDP;
     private JLabel heading = new JLabel("Client");
@@ -28,7 +29,6 @@ public class Client extends JFrame
     Socket clientSoc;
     DataInputStream din;
     DataOutputStream dout;
-
 
     public Client(String args)
     {
@@ -43,6 +43,7 @@ public class Client extends JFrame
             String LoginName=args;
 
             clientSocUDP = new DatagramSocket();
+            System.out.println(clientSocUDP);
             clientSoc = new Socket(ip,6666) ;
             System.out.println("Connected to Server at localhost Port-6666(TCP)");
             din = new DataInputStream(clientSoc.getInputStream());
@@ -50,107 +51,21 @@ public class Client extends JFrame
             String a="HELLO SERVER!!";
 
             file_contents = a.getBytes();
-            DatagramPacket initial = new DatagramPacket(file_contents,file_contents.length, InetAddress.getByName(ip),port); /*For sending a packet via UDP, we should know 4 things, the message to send, its length, ipaddress of destination, port at which destination is listening.*/
-            //System.out.println(initial);
+/*For sending a packet via UDP, we should know 4 things, the message to send, its length, ipaddress of destination, port at which destination is listening.*/
+            DatagramPacket initial = new DatagramPacket(file_contents,file_contents.length, InetAddress.getByName(ip),port);
+            System.out.println(initial);
             clientSocUDP.send(initial); //send for testing
             dout.writeUTF(LoginName);
 
             createGUI();
             handleEvents();
             //Recieve messages
-            new Thread(new RecievedMessagesHandler (din,LoginName,messageArea)).start();
+            new Thread(new RecievedMessagesHandler (din,LoginName,messageArea,clientSocUDP)).start();
 
             //Send messages
 
             String inputLine=null;
 
-//            while(true)
-//            {
-//                try
-//                {
-//                    inputLine=bufferedReader.readLine();
-//                    dout.writeUTF(inputLine);
-//                    if(inputLine.equals("LOGOUT"))
-//                    {
-//                        clientSoc.close();
-//                        din.close();
-//                        dout.close();
-//                        System.out.println("Logged Out");
-//                        System.exit(0);
-//                    }
-//                    StringTokenizer tokenedcommand = new StringTokenizer(inputLine);
-//                    //check file transfer
-//                    String comm,fl,typ;
-//                    comm = tokenedcommand.nextToken();
-//                    if(comm.equals("reply"))
-//                    {
-//                        boolean isFile=false;
-//                        if(tokenedcommand.hasMoreTokens())
-//                        {
-//                            fl=tokenedcommand.nextToken();
-//                            if(tokenedcommand.hasMoreTokens())
-//                            {
-//                                typ=tokenedcommand.nextToken();
-//                                //file transfer
-//                                if(typ.equals("tcp"))
-//                                {
-//                                    isFile=true;
-//                                    File file = new File(fl);
-//                                    FileInputStream fpin = new FileInputStream(file);
-//                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
-//                                    long fileLength =  file.length(), current=0, start = System.nanoTime();
-//                                    dout.writeUTF("LENGTH "+fileLength); //sending filelength to the server
-//                                    int size = 1000; //sending file content in chunks of size 1000 bytes
-//                                    while(current!=fileLength)
-//                                    {
-//                                        if(fileLength - current >= size) current+=size;
-//                                        else {
-//                                            size = (int)(fileLength-current);
-//                                            current=fileLength;
-//                                        }
-//                                        file_contents = new byte[size];
-//                                        bpin.read(file_contents,0,size);
-//                                        dout.write(file_contents);
-//                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
-//                                    }
-//                                    fpin.close();
-//                                    bpin.close();
-//                                    System.out.println("TCP: Sent file");
-//                                }
-//                                else if(typ.equals("udp"))
-//                                {
-//                                    int size=1024;
-//                                    isFile=true;
-//                                    File file = new File(fl);
-//                                    FileInputStream fpin = new FileInputStream(file);
-//                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
-//                                    long fileLength = file.length(), current =0, start =System.nanoTime();
-//                                    dout.writeUTF("LENGTH "+fileLength);
-//                                    while(current!=fileLength)
-//                                    {
-//                                        if(fileLength - current >= size) current+=size;
-//                                        else {
-//                                            size = (int)(fileLength-current);
-//                                            current=fileLength;
-//                                        }
-//                                        file_contents = new byte[size];
-//                                        bpin.read(file_contents,0,size);
-//                                        DatagramPacket sendPacket = new DatagramPacket(file_contents,size,InetAddress.getByName(ip),port);
-//                                        clientSocUDP.send(sendPacket);
-//                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
-//                                    }
-//                                    fpin.close();
-//                                    bpin.close();
-//                                    System.out.println("UDP: Sent file");
-//                                }
-//                            }
-//                        }
-//                    }
-//                } catch(Exception e){
-//                    System.out.println(e);
-////                    break;
-//                }
-//            }
         }
         catch(Exception e) {
             System.out.println(e);
@@ -300,14 +215,6 @@ public class Client extends JFrame
                     sayServer(msgToSend);
 
 
-
-
-
-//                    dout.writeUTF
-//                    out.println(msgToSend);
-//                    out.flush();
-//                    messageInp.setText("");
-//                    messageInp.requestFocus();
                 }
             }
 
@@ -347,14 +254,16 @@ class RecievedMessagesHandler implements Runnable {
     private DataInputStream server;
     private String LoginName;
     private JTextArea messageArea;
-    public RecievedMessagesHandler(DataInputStream server, String LoginName, JTextArea messageArea) {
+    private DatagramSocket clientSocUDP;
+    public RecievedMessagesHandler(DataInputStream server, String LoginName, JTextArea messageArea,DatagramSocket clientSocUDP) {
         this.server = server;
         this.LoginName = LoginName;
         this.messageArea = messageArea;
+        this.clientSocUDP = clientSocUDP;
     }
     @Override
     public void run() {
-        Client cl = new Client();
+//        Client cl = new Client();
 
         String inputLine=null;
         while(true)
@@ -387,7 +296,6 @@ class RecievedMessagesHandler implements Runnable {
                         if(size>fileLength)size=fileLength;
                         while((bytesRead=server.read(file_contents,0,size))!=-1 && fileLength>0)
                         {
-
                             bpout.write(file_contents,0,size);
                             if(total - current >= size) current+=size;
                             else current=total;
@@ -413,7 +321,7 @@ class RecievedMessagesHandler implements Runnable {
                         {
                             receivePacket  = new DatagramPacket(file_contents, size);
                             System.out.println("DEBUG: UDP start"); //start
-                            cl.clientSocUDP.receive(receivePacket);
+                            clientSocUDP.receive(receivePacket);
                             System.out.println("DEBUG: UDP received"); //recieved chunk
                             bpout.write(file_contents,0,size);
                             System.out.println("DEBUG: UDP write"); //write chunk
@@ -440,7 +348,7 @@ class RecievedMessagesHandler implements Runnable {
             }
             catch(Exception e){
                 e.printStackTrace(System.out);
-                break;
+
             }
         }
     }
