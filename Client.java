@@ -316,7 +316,7 @@ class RecievedMessagesHandler implements Runnable {
                         int size=1024,current=0,total = fileLength;
                         file_contents = new byte[size];
                         if(size>fileLength) size=fileLength;
-//                        System.out.println("DEBUG: UDP FILELENGTH ==> "+fileLength);
+                        System.out.println("DEBUG: UDP FILELENGTH ==> "+fileLength);
                         while(fileLength>0)
                         {
                             receivePacket  = new DatagramPacket(file_contents, size);

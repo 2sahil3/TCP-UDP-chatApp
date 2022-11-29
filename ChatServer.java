@@ -76,7 +76,8 @@ class AcceptClient extends Thread {
         ChatServer.ConnectedChatroom.put(LoginName,null);
         start() ; //start the thread
     }
-    public void run() {
+    public void run()
+    {
         while(true)
         {
             try
@@ -95,7 +96,7 @@ class AcceptClient extends Thread {
                         String outp=C.Leave(LoginName);
                         if(outp.equals("DEL")) ChatServer.Chatrooms.remove(C);
                         else dout.writeUTF(outp);
-
+                        System.out.println("Connection closing!!!");
                         ClientSocket.close();
                         din.close();
                         dout.close();
@@ -318,7 +319,9 @@ class AcceptClient extends Thread {
                 }
             }
             catch(Exception e) {
-                e.printStackTrace(System.out) ; break;
+                System.out.println("Connection closing!!!");
+                e.printStackTrace(System.out);
+                break;
             }
         }
     }
