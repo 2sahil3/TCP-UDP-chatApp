@@ -11,11 +11,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.StringTokenizer;
 
 public class Client extends JFrame
 {
-    public  String ip="192.168.1.172";
+    public  String ip="192.168.0.147";
     public int port = 6661;
     public DatagramSocket clientSocUDP;
     private JLabel heading = new JLabel("Client");
@@ -57,99 +58,99 @@ public class Client extends JFrame
             createGUI();
             handleEvents();
             //Recieve messages
-            new Thread(new RecievedMessagesHandler (din,LoginName)).start();
+            new Thread(new RecievedMessagesHandler (din,LoginName,messageArea)).start();
 
             //Send messages
 
             String inputLine=null;
 
-            while(true)
-            {
-                try
-                {
-                    inputLine=bufferedReader.readLine();
-                    dout.writeUTF(inputLine);
-                    if(inputLine.equals("LOGOUT"))
-                    {
-                        clientSoc.close();
-                        din.close();
-                        dout.close();
-                        System.out.println("Logged Out");
-                        System.exit(0);
-                    }
-                    StringTokenizer tokenedcommand = new StringTokenizer(inputLine);
-                    //check file transfer
-                    String comm,fl,typ;
-                    comm = tokenedcommand.nextToken();
-                    if(comm.equals("reply"))
-                    {
-                        boolean isFile=false;
-                        if(tokenedcommand.hasMoreTokens())
-                        {
-                            fl=tokenedcommand.nextToken();
-                            if(tokenedcommand.hasMoreTokens())
-                            {
-                                typ=tokenedcommand.nextToken();
-                                //file transfer
-                                if(typ.equals("tcp"))
-                                {
-                                    isFile=true;
-                                    File file = new File(fl);
-                                    FileInputStream fpin = new FileInputStream(file);
-                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
-                                    long fileLength =  file.length(), current=0, start = System.nanoTime();
-                                    dout.writeUTF("LENGTH "+fileLength); //sending filelength to the server
-                                    int size = 1000; //sending file content in chunks of size 1000 bytes
-                                    while(current!=fileLength)
-                                    {
-                                        if(fileLength - current >= size) current+=size;
-                                        else {
-                                            size = (int)(fileLength-current);
-                                            current=fileLength;
-                                        }
-                                        file_contents = new byte[size];
-                                        bpin.read(file_contents,0,size);
-                                        dout.write(file_contents);
-                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
-                                    }
-                                    fpin.close();
-                                    bpin.close();
-                                    System.out.println("TCP: Sent file");
-                                }
-                                else if(typ.equals("udp"))
-                                {
-                                    int size=1024;
-                                    isFile=true;
-                                    File file = new File(fl);
-                                    FileInputStream fpin = new FileInputStream(file);
-                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
-                                    long fileLength = file.length(), current =0, start =System.nanoTime();
-                                    dout.writeUTF("LENGTH "+fileLength);
-                                    while(current!=fileLength)
-                                    {
-                                        if(fileLength - current >= size) current+=size;
-                                        else {
-                                            size = (int)(fileLength-current);
-                                            current=fileLength;
-                                        }
-                                        file_contents = new byte[size];
-                                        bpin.read(file_contents,0,size);
-                                        DatagramPacket sendPacket = new DatagramPacket(file_contents,size,InetAddress.getByName(ip),port);
-                                        clientSocUDP.send(sendPacket);
-                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
-                                    }
-                                    fpin.close();
-                                    bpin.close();
-                                    System.out.println("UDP: Sent file");
-                                }
-                            }
-                        }
-                    }
-                } catch(Exception e){
-                    System.out.println(e);
-//                    break;
-                }
-            }
+//            while(true)
+//            {
+//                try
+//                {
+//                    inputLine=bufferedReader.readLine();
+//                    dout.writeUTF(inputLine);
+//                    if(inputLine.equals("LOGOUT"))
+//                    {
+//                        clientSoc.close();
+//                        din.close();
+//                        dout.close();
+//                        System.out.println("Logged Out");
+//                        System.exit(0);
+//                    }
+//                    StringTokenizer tokenedcommand = new StringTokenizer(inputLine);
+//                    //check file transfer
+//                    String comm,fl,typ;
+//                    comm = tokenedcommand.nextToken();
+//                    if(comm.equals("reply"))
+//                    {
+//                        boolean isFile=false;
+//                        if(tokenedcommand.hasMoreTokens())
+//                        {
+//                            fl=tokenedcommand.nextToken();
+//                            if(tokenedcommand.hasMoreTokens())
+//                            {
+//                                typ=tokenedcommand.nextToken();
+//                                //file transfer
+//                                if(typ.equals("tcp"))
+//                                {
+//                                    isFile=true;
+//                                    File file = new File(fl);
+//                                    FileInputStream fpin = new FileInputStream(file);
+//                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
+//                                    long fileLength =  file.length(), current=0, start = System.nanoTime();
+//                                    dout.writeUTF("LENGTH "+fileLength); //sending filelength to the server
+//                                    int size = 1000; //sending file content in chunks of size 1000 bytes
+//                                    while(current!=fileLength)
+//                                    {
+//                                        if(fileLength - current >= size) current+=size;
+//                                        else {
+//                                            size = (int)(fileLength-current);
+//                                            current=fileLength;
+//                                        }
+//                                        file_contents = new byte[size];
+//                                        bpin.read(file_contents,0,size);
+//                                        dout.write(file_contents);
+//                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
+//                                    }
+//                                    fpin.close();
+//                                    bpin.close();
+//                                    System.out.println("TCP: Sent file");
+//                                }
+//                                else if(typ.equals("udp"))
+//                                {
+//                                    int size=1024;
+//                                    isFile=true;
+//                                    File file = new File(fl);
+//                                    FileInputStream fpin = new FileInputStream(file);
+//                                    BufferedInputStream bpin = new BufferedInputStream(fpin);
+//                                    long fileLength = file.length(), current =0, start =System.nanoTime();
+//                                    dout.writeUTF("LENGTH "+fileLength);
+//                                    while(current!=fileLength)
+//                                    {
+//                                        if(fileLength - current >= size) current+=size;
+//                                        else {
+//                                            size = (int)(fileLength-current);
+//                                            current=fileLength;
+//                                        }
+//                                        file_contents = new byte[size];
+//                                        bpin.read(file_contents,0,size);
+//                                        DatagramPacket sendPacket = new DatagramPacket(file_contents,size,InetAddress.getByName(ip),port);
+//                                        clientSocUDP.send(sendPacket);
+//                                        System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
+//                                    }
+//                                    fpin.close();
+//                                    bpin.close();
+//                                    System.out.println("UDP: Sent file");
+//                                }
+//                            }
+//                        }
+//                    }
+//                } catch(Exception e){
+//                    System.out.println(e);
+////                    break;
+//                }
+//            }
         }
         catch(Exception e) {
             System.out.println(e);
@@ -161,13 +162,14 @@ public class Client extends JFrame
 
     }
 
-    private void sayServer()
+    private int sayServer(String msgToSend)
     {
         try
         {
-            String inputLine=bufferedReader.readLine();
-            dout.writeUTF(inputLine);
-            if(inputLine.equals("LOGOUT"))
+
+//            String inputLine=bufferedReader.readLine();
+            dout.writeUTF(msgToSend);
+            if(msgToSend.equals("LOGOUT"))
             {
                 clientSoc.close();
                 din.close();
@@ -175,10 +177,15 @@ public class Client extends JFrame
                 System.out.println("Logged Out");
                 System.exit(0);
             }
-            StringTokenizer tokenedcommand = new StringTokenizer(inputLine);
+
+
+            StringTokenizer tokenedcommand = new StringTokenizer(msgToSend);
             //check file transfer
+
             String comm,fl,typ;
             comm = tokenedcommand.nextToken();
+
+
             if(comm.equals("reply"))
             {
                 boolean isFile=false;
@@ -209,10 +216,13 @@ public class Client extends JFrame
                                 bpin.read(file_contents,0,size);
                                 dout.write(file_contents);
                                 System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
+                                messageArea.append("Sending file..."+(current*100/fileLength)+"% complete\n");
+
                             }
                             fpin.close();
                             bpin.close();
                             System.out.println("TCP: Sent file");
+                            messageArea.append("TCP: Sent file\n");
                         }
                         else if(typ.equals("udp"))
                         {
@@ -235,19 +245,34 @@ public class Client extends JFrame
                                 DatagramPacket sendPacket = new DatagramPacket(file_contents,size,InetAddress.getByName(ip),port);
                                 clientSocUDP.send(sendPacket);
                                 System.out.println("Sending file..."+(current*100/fileLength)+"% complete");
+                                messageArea.append("Sending file..."+(current*100/fileLength)+"% complete\n");
                             }
                             fpin.close();
                             bpin.close();
                             System.out.println("UDP: Sent file");
+                            messageArea.append("UDP: Sent file\n");
+                        }
+                        else
+                        {
+                            messageArea.append("You:" + msgToSend.substring(6) + "\n");
                         }
                     }
+                    else
+                    {
+                        messageArea.append("You:" + msgToSend.substring(6) + "\n");
+                    }
+
                 }
             }
+            else{
+                messageArea.append("You: " + msgToSend+"\n");
+            }
         }
-        catch(Exception e){
+        catch(Exception e)
+        {
             System.out.println(e);
-//                    break;
         }
+        return 1;
     }
 
     private void handleEvents() {
@@ -264,14 +289,21 @@ public class Client extends JFrame
             @Override
             public void keyReleased(KeyEvent e) {
                 // TODO Auto-generated method stub
-                System.out.println("key released" + e.getKeyCode());
+//                System.out.println("key released" + e.getKeyCode());
                 // enter key code is 10
-                if (e.getKeyCode() == 10) {
-                    sayServer();
-//                    String msgToSend = messageInp.getText();
+                if (e.getKeyCode() == 10)
+                {
+                    String msgToSend = messageInp.getText();
+                    messageInp.setText("");
+                    messageInp.requestFocus();
 //                    messageArea.append("You:" + msgToSend + "\n");
+                    sayServer(msgToSend);
+
+
+
+
+
 //                    dout.writeUTF
-//
 //                    out.println(msgToSend);
 //                    out.flush();
 //                    messageInp.setText("");
@@ -314,9 +346,11 @@ public class Client extends JFrame
 class RecievedMessagesHandler implements Runnable {
     private DataInputStream server;
     private String LoginName;
-    public RecievedMessagesHandler(DataInputStream server,String LoginName) {
+    private JTextArea messageArea;
+    public RecievedMessagesHandler(DataInputStream server, String LoginName, JTextArea messageArea) {
         this.server = server;
         this.LoginName = LoginName;
+        this.messageArea = messageArea;
     }
     @Override
     public void run() {
@@ -357,6 +391,7 @@ class RecievedMessagesHandler implements Runnable {
                             bpout.write(file_contents,0,size);
                             if(total - current >= size) current+=size;
                             else current=total;
+                            messageArea.append( "Recieving file..."+(current*100/total)+"% complete"+"\n");
                             System.out.println("Recieving file..."+(current*100/total)+"% complete");
                             fileLength-=size;
                             if(size>fileLength) size=fileLength;
@@ -365,6 +400,7 @@ class RecievedMessagesHandler implements Runnable {
                         bpout.flush();
                         fpout.close();
                         bpout.close();
+                        messageArea.append("TCP: Recieved file \n");
                         System.out.println("TCP: Recieved file");
                     }
                     else
@@ -372,7 +408,7 @@ class RecievedMessagesHandler implements Runnable {
                         int size=1024,current=0,total = fileLength;
                         file_contents = new byte[size];
                         if(size>fileLength) size=fileLength;
-                        System.out.println("DEBUG: UDP FILELENGTH ==> "+fileLength);
+//                        System.out.println("DEBUG: UDP FILELENGTH ==> "+fileLength);
                         while(fileLength>0)
                         {
                             receivePacket  = new DatagramPacket(file_contents, size);
@@ -384,7 +420,7 @@ class RecievedMessagesHandler implements Runnable {
                             if(total - current >= size) current+=size;
                             else current=total;
                             System.out.println("Recieving file..."+(current*100/total)+"% complete");
-
+                            messageArea.append("Recieving file..."+(current*100/total)+"% complete");
                             fileLength-=size;
                             if(size>fileLength) size=fileLength;
                         }
@@ -396,7 +432,11 @@ class RecievedMessagesHandler implements Runnable {
                     }
                 }
                 else
+                {
                     System.out.println(inputLine);
+                    messageArea.append(inputLine+"\n");
+                }
+
             }
             catch(Exception e){
                 e.printStackTrace(System.out);

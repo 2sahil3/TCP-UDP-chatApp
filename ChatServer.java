@@ -84,6 +84,7 @@ class AcceptClient extends Thread {
                 String commandfromClient = new String() ;
                 commandfromClient = din.readUTF() ; //read client command
                 StringTokenizer tokenedcommand = new StringTokenizer(commandfromClient); //parsing client command
+
                 String command=tokenedcommand.nextToken();
                 if(command.equals("LOGOUT"))
                 {
@@ -107,7 +108,9 @@ class AcceptClient extends Thread {
                 }
                 if(command.equals("create"))
                 {
+
                     Chatroom C = ChatServer.ConnectedChatroom.get(LoginName);
+
                     if(C!=null) dout.writeUTF("You are already part of chatroom "+C.name);
 
                     else
