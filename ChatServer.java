@@ -274,6 +274,7 @@ class AcceptClient extends Thread {
                                 else
                                 {
                                     String st_ = din.readUTF();
+                                    System.out.println(st_);
                                     StringTokenizer stt = new StringTokenizer(st_);
                                     stt.nextToken();
                                     int fileLength = Integer.parseInt(stt.nextToken());
@@ -292,10 +293,13 @@ class AcceptClient extends Thread {
                                             if(!member.equals(LoginName))
                                             {
                                                 String port = ChatServer.Ports.elementAt(ChatServer.LoginNames.indexOf(member)).toString();
-                                                packetUDP = new DatagramPacket(file_contents,size,InetAddress.getByName("127.0.0.1"),Integer.parseInt(port));
+                                                packetUDP = new DatagramPacket(file_contents,size,InetAddress.getByName("0.0.0.0"),Integer.parseInt(port));
                                                 SocUDP.send(packetUDP);
                                             }
+                                            System.out.println("sent to " + i);
+
                                         }
+                                        sleep(100);
                                         fileLength-=size;
                                         if(size>fileLength) size=fileLength;
                                     }

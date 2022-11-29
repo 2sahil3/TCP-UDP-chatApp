@@ -321,6 +321,7 @@ class RecievedMessagesHandler implements Runnable {
                         {
                             receivePacket  = new DatagramPacket(file_contents, size);
                             System.out.println("DEBUG: UDP start"); //start
+                            clientSocUDP.setSoTimeout(3000);
                             clientSocUDP.receive(receivePacket);
                             System.out.println("DEBUG: UDP received"); //recieved chunk
                             bpout.write(file_contents,0,size);
@@ -328,7 +329,7 @@ class RecievedMessagesHandler implements Runnable {
                             if(total - current >= size) current+=size;
                             else current=total;
                             System.out.println("Recieving file..."+(current*100/total)+"% complete");
-                            messageArea.append("Recieving file..."+(current*100/total)+"% complete");
+                            messageArea.append("Recieving file..."+(current*100/total)+"% complete\n");
                             fileLength-=size;
                             if(size>fileLength) size=fileLength;
                         }
